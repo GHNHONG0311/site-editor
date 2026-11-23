@@ -51,7 +51,7 @@ import {
     type WriteFileOutput,
 } from '@onlook/code-provider';
 
-type Method = Parameters<typeof api.sandbox.call.mutate>[0]['method'];
+type Method = Parameters<typeof api.sandbox.exec.mutate>[0]['method'];
 
 const toBase64 = (bytes: Uint8Array) => {
     let bin = '';
@@ -77,7 +77,7 @@ export class RemoteSandboxProvider extends Provider {
             base64Content = toBase64(args.content);
             args = { ...args, content: undefined };
         }
-        return (await api.sandbox.call.mutate({
+        return (await api.sandbox.exec.mutate({
             sandboxId: this.sandboxId,
             method,
             args,

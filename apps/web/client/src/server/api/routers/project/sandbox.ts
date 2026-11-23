@@ -14,7 +14,7 @@ async function getProvider({ sandboxId }: { sandboxId: string; userId?: string }
     return provider;
 }
 
-/** Provider methods the browser may call through `sandbox.call`; all take `{ args }`. */
+/** Provider methods the browser may call through `sandbox.exec`; all take `{ args }`. */
 const REMOTE_METHODS = [
     'writeFile',
     'renameFile',
@@ -77,7 +77,7 @@ export const sandboxRouter = createTRPCRouter({
             await provider.destroy();
             return session;
         }),
-    call: protectedProcedure
+    exec: protectedProcedure
         .input(
             z.object({
                 sandboxId: z.string(),
