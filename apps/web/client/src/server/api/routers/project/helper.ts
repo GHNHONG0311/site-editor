@@ -22,8 +22,8 @@ export function extractCsbPort(frames: Frame[]): number | null {
 
     for (const frame of frames) {
         if (frame.url) {
-            // Match CSB preview URL pattern: https://sandboxId-port.csb.app
-            const match = frame.url.match(/https:\/\/[^-]+-(\d+)\.csb\.app/);
+            // Match preview URL pattern: <site>/api/sandbox-preview/<sandboxId>/<port>
+            const match = frame.url.match(/\/api\/sandbox-preview\/[^/]+\/(\d+)/);
             if (match && match[1]) {
                 const port = parseInt(match[1], 10);
                 if (!isNaN(port)) {

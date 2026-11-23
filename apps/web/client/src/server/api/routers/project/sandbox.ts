@@ -1,43 +1,34 @@
 import { TRPCError } from '@trpc/server';
 import { z } from 'zod';
 
-import {
-    CodeProvider,
-    createCodeProviderClient,
-    getStaticCodeProvider,
-} from '@onlook/code-provider';
+import { VercelSandboxProvider } from '@onlook/code-provider/vercel-sandbox';
 import { getSandboxPreviewUrl, SandboxTemplates, Templates } from '@onlook/constants';
 import { shortenUuid } from '@onlook/utility/src/id';
 
 import { createTRPCRouter, protectedProcedure } from '../../trpc';
 import { listAccessibleSandboxIds, verifySandboxAccess } from './helper';
 
-function getProvider({
-    sandboxId,
-    userId,
-    provider = CodeProvider.CodeSandbox,
-}: {
-    sandboxId: string;
-    provider?: CodeProvider;
-    userId?: undefined | string;
-}) {
-    if (provider === CodeProvider.CodeSandbox) {
-        return createCodeProviderClient(CodeProvider.CodeSandbox, {
-            providerOptions: {
-                codesandbox: {
-                    sandboxId,
-                    userId,
-                },
-            },
-        });
-    } else {
-        return createCodeProviderClient(CodeProvider.NodeFs, {
-            providerOptions: {
-                nodefs: {},
-            },
-        });
-    }
+async function getProvider({ sandboxId }: { sandboxId: string; userId?: string }) {
+    const provider = new VercelSandboxProvider({ sandboxId });
+    await provider.initialize({});
+    return provider;
 }
+
+/** Provider methods the browser may call through `sandbox.call`; all take `{ args }`. */
+const REMOTE_METHODS = [
+    'writeFile',
+    'renameFile',
+    'statFile',
+    'deleteFiles',
+    'listFiles',
+    'readFile',
+    'copyFiles',
+    'createDirectory',
+    'runCommand',
+    'gitStatus',
+    'setup',
+    'reload',
+] as const;
 
 export const sandboxRouter = createTRPCRouter({
     create: protectedProcedure
@@ -48,12 +39,10 @@ export const sandboxRouter = createTRPCRouter({
         )
         .mutation(async ({ input }) => {
             // Create a new sandbox using the static provider
-            const CodesandboxProvider = await getStaticCodeProvider(CodeProvider.CodeSandbox);
-
             // Use the empty Next.js template
             const template = SandboxTemplates[Templates.EMPTY_NEXTJS];
 
-            const newSandbox = await CodesandboxProvider.createProject({
+            const newSandbox = await VercelSandboxProvider.createProject({
                 source: 'template',
                 id: template.id,
                 title: input.title || 'Onlook Test Sandbox',
@@ -87,6 +76,55 @@ export const sandboxRouter = createTRPCRouter({
             });
             await provider.destroy();
             return session;
+        }),
+    call: protectedProcedure
+        .input(
+            z.object({
+                sandboxId: z.string(),
+                method: z.enum(REMOTE_METHODS),
+                args: z.record(z.string(), z.unknown()).default({}),
+                // binary writes arrive base64-encoded
+                base64Content: z.string().optional(),
+            }),
+        )
+        .mutation(async ({ input, ctx }) => {
+            await verifySandboxAccess(ctx.db, ctx.user.id, input.sandboxId);
+            const provider = await getProvider({ sandboxId: input.sandboxId });
+            const args = { ...input.args } as Record<string, unknown>;
+            if (input.base64Content !== undefined) {
+                args.content = new Uint8Array(Buffer.from(input.base64Content, 'base64'));
+            }
+            if (input.method === 'reload') return provider.reload();
+            if (input.method === 'readFile') {
+                const { file } = await provider.readFile({ args: args as { path: string } });
+                return file.type === 'binary'
+                    ? { type: 'binary' as const, path: file.path, base64: file.toString() }
+                    : { type: 'text' as const, path: file.path, content: file.content };
+            }
+            // Each remaining method takes `{ args }` with the shape the browser provider sent.
+            const fn = provider[input.method] as (i: { args: unknown }) => Promise<unknown>;
+            return fn.call(provider, { args });
+        }),
+    mtimes: protectedProcedure
+        .input(
+            z.object({
+                sandboxId: z.string(),
+                path: z.string(),
+                excludes: z.array(z.string()).optional(),
+            }),
+        )
+        .query(async ({ input, ctx }) => {
+            await verifySandboxAccess(ctx.db, ctx.user.id, input.sandboxId);
+            const provider = await getProvider({ sandboxId: input.sandboxId });
+            return provider.listMtimes(input.path, input.excludes);
+        }),
+    devLog: protectedProcedure
+        .input(z.object({ sandboxId: z.string() }))
+        .query(async ({ input, ctx }) => {
+            await verifySandboxAccess(ctx.db, ctx.user.id, input.sandboxId);
+            const provider = await getProvider({ sandboxId: input.sandboxId });
+            const { task } = await provider.getTask({ args: { id: 'dev' } });
+            return task.open();
         }),
     hibernate: protectedProcedure
         .input(
@@ -143,10 +181,7 @@ export const sandboxRouter = createTRPCRouter({
 
             for (let attempt = 1; attempt <= MAX_RETRY_ATTEMPTS; attempt++) {
                 try {
-                    const CodesandboxProvider = await getStaticCodeProvider(
-                        CodeProvider.CodeSandbox,
-                    );
-                    const sandbox = await CodesandboxProvider.createProject({
+                    const sandbox = await VercelSandboxProvider.createProject({
                         source: 'template',
                         id: input.sandbox.id,
 
@@ -207,10 +242,7 @@ export const sandboxRouter = createTRPCRouter({
 
             for (let attempt = 1; attempt <= MAX_RETRY_ATTEMPTS; attempt++) {
                 try {
-                    const CodesandboxProvider = await getStaticCodeProvider(
-                        CodeProvider.CodeSandbox,
-                    );
-                    const sandbox = await CodesandboxProvider.createProjectFromGit({
+                    const sandbox = await VercelSandboxProvider.createProjectFromGit({
                         repoUrl: input.repoUrl,
                         branch: input.branch,
                     });

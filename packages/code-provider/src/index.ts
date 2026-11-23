@@ -58,3 +58,4 @@ function newProviderInstance(codeProvider: CodeProvider, providerOptions: Provid
 
     throw new Error(`Unimplemented code provider: ${codeProvider}`);
 }
+export { CommandTerminal, DevTask, LogCommand, PollingFileWatcher, diffMtimes } from './providers/polling';

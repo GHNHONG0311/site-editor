@@ -1,4 +1,4 @@
-import { CodeProvider, getStaticCodeProvider } from '@onlook/code-provider';
+import { VercelSandboxProvider } from '@onlook/code-provider/vercel-sandbox';
 import { getSandboxPreviewUrl, SandboxTemplates, Templates } from '@onlook/constants';
 import { branches, branchInsertSchema, branchUpdateSchema, canvases, createDefaultFrame, frames, fromDbBranch, fromDbFrame } from '@onlook/db';
 import type { Frame } from '@onlook/models';
@@ -120,8 +120,7 @@ export const branchRouter = createTRPCRouter({
                 const branchName: string = generateUniqueBranchName(sourceBranch.name, existingNames);
 
                 // Fork the sandbox using code provider
-                const CodesandboxProvider = await getStaticCodeProvider(CodeProvider.CodeSandbox);
-                const forkedSandbox = await CodesandboxProvider.createProject({
+                const forkedSandbox = await VercelSandboxProvider.createProject({
                     source: 'template',
                     id: sourceBranch.sandboxId,
                     title: branchName,
@@ -264,8 +263,7 @@ export const branchRouter = createTRPCRouter({
                     }
 
                     // Create new blank sandbox
-                    const CodesandboxProvider = await getStaticCodeProvider(CodeProvider.CodeSandbox);
-                    const blankSandbox = await CodesandboxProvider.createProject({
+                    const blankSandbox = await VercelSandboxProvider.createProject({
                         source: 'template',
                         id: SandboxTemplates[Templates.EMPTY_NEXTJS].id,
                         title: branchName,

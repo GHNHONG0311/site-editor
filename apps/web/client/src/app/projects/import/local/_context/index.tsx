@@ -5,7 +5,7 @@ import type { ReactNode } from 'react';
 import { createContext, useContext, useState } from 'react';
 
 import type { Provider } from '@onlook/code-provider';
-import { CodeProvider, createCodeProviderClient } from '@onlook/code-provider';
+import { RemoteSandboxProvider } from '@/components/store/editor/sandbox/remote-provider';
 import { NEXT_JS_FILE_EXTENSIONS, SandboxTemplates, Templates } from '@onlook/constants';
 import { RouterType } from '@onlook/models';
 import { isTargetFile } from '@onlook/utility';
@@ -101,7 +101,6 @@ export const ProjectCreationProvider = ({ children, totalSteps }: ProjectCreatio
     const { data: user } = api.user.get.useQuery();
     const { mutateAsync: createProject } = api.project.create.useMutation();
     const { mutateAsync: forkSandbox } = api.sandbox.fork.useMutation();
-    const { mutateAsync: startSandbox } = api.sandbox.start.useMutation();
 
     const setProjectData = (newData: Partial<Project>) => {
         setProjectDataState((prevData) => ({ ...prevData, ...newData }));
@@ -135,19 +134,7 @@ export const ProjectCreationProvider = ({ children, totalSteps }: ProjectCreatio
                 },
             });
 
-            const provider = await createCodeProviderClient(CodeProvider.CodeSandbox, {
-                providerOptions: {
-                    codesandbox: {
-                        sandboxId: forkedSandbox.sandboxId,
-                        userId: user.id,
-                        initClient: true,
-                        keepActiveWhileConnected: false,
-                        getSession: async (sandboxId) => {
-                            return startSandbox({ sandboxId });
-                        },
-                    },
-                },
-            });
+            const provider = new RemoteSandboxProvider(forkedSandbox.sandboxId);
 
             await uploadToSandbox(projectData.files, provider);
             await provider.setup({});

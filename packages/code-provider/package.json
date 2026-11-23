@@ -37,6 +37,11 @@
         "@codesandbox/sdk": "^1.1.6",
         "@onlook/models": "*",
         "@onlook/parser": "*",
-        "@onlook/utility": "*"
+        "@onlook/utility": "*",
+        "@vercel/sandbox": "^4.1.0"
+    },
+    "exports": {
+        ".": "./src/index.ts",
+        "./vercel-sandbox": "./src/providers/vercel-sandbox/index.ts"
     }
 }

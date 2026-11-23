@@ -1,6 +1,6 @@
 import { protectedProcedure } from '@/server/api/trpc';
 import { trackEvent } from '@/utils/analytics/server';
-import { CodeProvider, getStaticCodeProvider } from '@onlook/code-provider';
+import { VercelSandboxProvider } from '@onlook/code-provider/vercel-sandbox';
 import { getSandboxPreviewUrl, Tags } from '@onlook/constants';
 import {
     branches,
@@ -57,7 +57,6 @@ async function forkAllBranches(
     sourceBranches: Branch[],
     sourceProjectName: string
 ): Promise<Map<string, ForkedBranch>> {
-    const CodesandboxProvider = await getStaticCodeProvider(CodeProvider.CodeSandbox);
     const branchMapping = new Map<string, ForkedBranch>();
 
     for (const sourceBranch of sourceBranches) {
@@ -65,7 +64,7 @@ async function forkAllBranches(
             throw new Error(`Branch ${sourceBranch.name} has no sandbox ID`);
         }
 
-        const newSandbox = await CodesandboxProvider.createProject({
+        const newSandbox = await VercelSandboxProvider.createProject({
             source: 'template',
             id: sourceBranch.sandboxId,
             title: `${sourceProjectName} (Fork) - ${sourceBranch.name}`,

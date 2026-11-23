@@ -19,6 +19,11 @@ export const SandboxTemplates: Record<Templates, SandboxTemplate> = {
 export const CSB_PREVIEW_TASK_NAME = 'dev';
 export const CSB_DOMAIN = 'csb.app';
 
+/**
+ * Stable preview URL served by this app. It wakes the Vercel Sandbox and redirects to its
+ * current domain, which changes between sandbox sessions.
+ */
 export function getSandboxPreviewUrl(sandboxId: string, port: number) {
-    return `https://${sandboxId}-${port}.${CSB_DOMAIN}`;
+    const base = (process.env.NEXT_PUBLIC_SITE_URL ?? '').replace(/\/$/, '');
+    return `${base}/api/sandbox-preview/${sandboxId}/${port}`;
 }
