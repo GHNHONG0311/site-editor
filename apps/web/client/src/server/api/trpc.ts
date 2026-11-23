@@ -9,6 +9,7 @@
 
 import { createAdminClient } from '@/utils/supabase/admin';
 import { createClient } from '@/utils/supabase/server';
+import { isAllowedEmail } from '@/utils/allowed-email';
 import { db } from '@onlook/db/src/client';
 import type { User } from '@supabase/supabase-js';
 import { initTRPC, TRPCError } from '@trpc/server';
@@ -42,7 +43,8 @@ export const createTRPCContext = async (opts: { headers: Headers }) => {
     return {
         db,
         supabase,
-        user,
+        // Accounts outside the allowlist are treated as signed out.
+        user: user && isAllowedEmail(user.email) ? user : null,
         ...opts,
     };
 };

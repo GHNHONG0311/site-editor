@@ -1,4 +1,5 @@
 import { verifySandboxAccess } from '@/server/api/routers/project/helper';
+import { isAllowedEmail } from '@/utils/allowed-email';
 import { createClient } from '@/utils/supabase/server';
 import { VercelSandboxProvider } from '@onlook/code-provider/vercel-sandbox';
 import { db } from '@onlook/db/src/client';
@@ -19,7 +20,7 @@ export async function GET(
     const {
         data: { user },
     } = await supabase.auth.getUser();
-    if (!user) return new Response('Unauthorized', { status: 401 });
+    if (!user || !isAllowedEmail(user.email)) return new Response('Unauthorized', { status: 401 });
     try {
         await verifySandboxAccess(db, user.id, sandboxId);
     } catch {

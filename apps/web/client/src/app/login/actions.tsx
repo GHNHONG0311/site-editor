@@ -3,6 +3,7 @@
 import { env } from '@/env';
 import { Routes } from '@/utils/constants';
 import { createClient } from '@/utils/supabase/server';
+import { isAllowedEmail } from '@/utils/allowed-email';
 import { SEED_USER } from '@onlook/db';
 import { SignInMethod } from '@onlook/models';
 import { headers } from 'next/headers';
@@ -59,4 +60,25 @@ export async function devLogin() {
         throw new Error(error.message);
     }
     redirect(Routes.AUTH_REDIRECT);
+}
+/**
+ * Email magic-link sign-in. Only addresses in ALLOWED_LOGIN_EMAILS (comma-separated) may sign in,
+ * so a public URL does not let strangers use the editor.
+ */
+export async function emailLogin(email: string): Promise<{ ok: boolean; error?: string }> {
+    const normalized = email.trim().toLowerCase();
+    if (!env.ALLOWED_LOGIN_EMAILS || !isAllowedEmail(normalized)) {
+        return { ok: false, error: '这个邮箱没有使用权限。' };
+    }
+    const supabase = await createClient();
+    const origin = (await headers()).get('origin') ?? env.NEXT_PUBLIC_SITE_URL;
+    const { error } = await supabase.auth.signInWithOtp({
+        email: normalized,
+        options: { emailRedirectTo: `${origin}${Routes.AUTH_CALLBACK}` },
+    });
+    if (error) {
+        console.error('Error sending login email:', error);
+        return { ok: false, error: '发送登录邮件失败，请稍后再试。' };
+    }
+    return { ok: true };
 }

@@ -3,13 +3,13 @@
 import { useGetBackground } from '@/hooks/use-get-background';
 import { transKeys } from '@/i18n/keys';
 import { LocalForageKeys, Routes } from '@/utils/constants';
-import { SignInMethod } from '@onlook/models/auth';
 import { Icons } from '@onlook/ui/icons';
 import { useTranslations } from 'next-intl';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
-import { DevLoginButton, LoginButton } from '../_components/login-button';
+import { DevLoginButton } from '../_components/login-button';
+import { EmailLogin } from './email-login';
 
 export default function LoginPage() {
     const isDev = process.env.NODE_ENV === 'development';
@@ -34,42 +34,8 @@ export default function LoginPage() {
                             {t(transKeys.welcome.description)}
                         </p>
                     </div>
-                    <div className="space-y-2 md:space-y-0 md:space-x-2 flex flex-col md:flex-row">
-                        <LoginButton
-                            returnUrl={returnUrl}
-                            method={SignInMethod.GITHUB}
-                            icon={<Icons.GitHubLogo className="w-4 h-4 mr-2" />}
-                            translationKey="github"
-                            providerName="GitHub"
-                        />
-                        <LoginButton
-                            returnUrl={returnUrl}
-                            method={SignInMethod.GOOGLE}
-                            icon={<Icons.GoogleLogo viewBox="0 0 24 24" className="w-4 h-4 mr-2" />}
-                            translationKey="google"
-                            providerName="Google"
-                        />
-                    </div>
+                    <EmailLogin />
                     {isDev && <DevLoginButton returnUrl={returnUrl} />}
-                    <p className="text-small text-foreground-onlook">
-                        {t(transKeys.welcome.terms.agreement)}{' '}
-                        <Link
-                            href="https://onlook.com/privacy-policy"
-                            target="_blank"
-                            className="text-gray-300 hover:text-gray-50 underline transition-colors duration-200"
-                        >
-                            {t(transKeys.welcome.terms.privacy)}
-                        </Link>
-                        {' '}
-                        {t(transKeys.welcome.terms.and)}{' '}
-                        <Link
-                            href="https://onlook.com/terms-of-service"
-                            target="_blank"
-                            className="text-gray-300 hover:text-gray-50 underline transition-colors duration-200"
-                        >
-                            {t(transKeys.welcome.terms.tos)}
-                        </Link>
-                    </p>
                 </div>
                 <div className="flex flex-row space-x-1 text-small text-gray-600">
                     <p>{t(transKeys.welcome.version, { version: '1.0.0' })}</p>
