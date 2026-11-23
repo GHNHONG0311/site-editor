@@ -19,15 +19,15 @@ import { faqSchema, organizationSchema } from './seo';
 const isProduction = env.NODE_ENV === 'production';
 
 export const metadata: Metadata = {
-    title: 'Onlook – Cursor for Designers',
-    description: 'The power of Cursor for your own website. Onlook lets you edit your React website and write your changes back to code in real-time. Iterate and experiment with AI.',
+    title: 'Site Editor 网站编辑器',
+    description: '可视化修改 AI 写的网站，改动直接写回代码。',
     icons: [{ rel: 'icon', url: '/favicon.ico' }],
     openGraph: {
         url: 'https://onlook.com/',
         type: 'website',
-        siteName: 'Onlook',
-        title: 'Onlook – Cursor for Designers',
-        description: 'The power of Cursor for your own website. Onlook lets you edit your React website and write your changes back to code in real-time. Iterate and experiment with AI.',
+        siteName: 'Site Editor',
+        title: 'Site Editor 网站编辑器',
+        description: '可视化修改 AI 写的网站，改动直接写回代码。',
         images: [
             {
                 url: 'https://framerusercontent.com/images/ScnnNT7JpmUya7afqGAets8.png',
@@ -38,8 +38,8 @@ export const metadata: Metadata = {
         card: 'summary_large_image',
         site: '@onlookdev',
         creator: '@onlookdev',
-        title: 'Onlook – Cursor for Designers',
-        description: 'The power of Cursor for your own website. Onlook lets you edit your React website and write your changes back to code in real-time. Iterate and experiment with AI.',
+        title: 'Site Editor 网站编辑器',
+        description: '可视化修改 AI 写的网站，改动直接写回代码。',
         images: [
             {
                 url: 'https://framerusercontent.com/images/ScnnNT7JpmUya7afqGAets8.png',

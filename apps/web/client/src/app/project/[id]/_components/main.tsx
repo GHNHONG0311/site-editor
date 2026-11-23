@@ -1,6 +1,7 @@
 'use client';
 
 import { useEditorEngine } from '@/components/store/editor';
+import { env } from '@/env';
 import { SubscriptionModal } from '@/components/ui/pricing-modal';
 import { SettingsModalWithProjects } from '@/components/ui/settings-modal/with-project';
 import { EditorAttributes } from '@onlook/constants';
@@ -20,6 +21,9 @@ import { EditorBar } from './editor-bar';
 import { LeftPanel } from './left-panel';
 import { RightPanel } from './right-panel';
 import { TopBar } from './top-bar';
+
+// AI chat is off unless NEXT_PUBLIC_ENABLE_AI=true; every edit works without it.
+const AI_ENABLED = env.NEXT_PUBLIC_ENABLE_AI === 'true';
 
 export const Main = observer(() => {
     const router = useRouter();
@@ -119,10 +123,10 @@ export const Main = observer(() => {
                     ref={rightPanelRef}
                     className={cn(
                         "absolute top-10 right-0 h-[calc(100%-40px)] z-50",
-                        editorEngine.state.editorMode === EditorMode.PREVIEW && 'hidden'
+                        (editorEngine.state.editorMode === EditorMode.PREVIEW || !AI_ENABLED) && 'hidden'
                     )}
                 >
-                    <RightPanel />
+                    {AI_ENABLED && <RightPanel />}
                 </div>
 
                 <BottomBar />

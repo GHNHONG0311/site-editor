@@ -22,8 +22,8 @@
                     "無制限のプロジェクト",
                     "無制限のAIチャットメッセージ（1日あたり）",
                     "無制限の月間チャット",
-                    "ビルド時にOnlookの透かしを削除",
-                    "Onlookでホスティングされた1つの無料カスタムドメイン",
+                    "ビルド時にSite Editorの透かしを削除",
+                    "Site Editorでホスティングされた1つの無料カスタムドメイン",
                     "優先サポート"
                 ]
             },
@@ -247,12 +247,12 @@
                 "load": "既存のプロジェクトを読み込む"
             },
             "loading": {
-                "title": "新しいOnlookアプリをセットアップしています...",
+                "title": "新しいSite Editorアプリをセットアップしています...",
                 "description": "数秒かかる場合があります",
                 "cancel": "キャンセル"
             },
             "error": {
-                "title": "Onlookアプリの作成中にエラーが発生しました",
+                "title": "Site Editorアプリの作成中にエラーが発生しました",
                 "backToPrompt": "プロンプトに戻る"
             }
         },
@@ -267,7 +267,7 @@
         "actions": {
             "import": "インポート",
             "close": "閉じる",
-            "about": "Onlookについて",
+            "about": "Site Editorについて",
             "signOut": "サインアウト",
             "editApp": "アプリを編集",
             "projectSettings": "プロジェクト設定",
@@ -323,8 +323,8 @@
         }
     },
     "welcome": {
-        "title": "Onlookへようこそ",
-        "titleReturn": "Onlookにお帰りなさい",
+        "title": "Site Editorへようこそ",
+        "titleReturn": "Site Editorにお帰りなさい",
         "description": "AIを活用した次世代のビジュアルコードエディタで、デザイナーとプロダクトマネージャーがコードでウェブ体験を作成できます。",
         "alpha": "アルファ版",
         "login": {
@@ -344,7 +344,7 @@
     },
     "help": {
         "menu": {
-            "reloadOnlook": "Onlookを再読み込み",
+            "reloadSite Editor": "Site Editorを再読み込み",
             "theme": {
                 "title": "テーマ",
                 "light": "ライト",

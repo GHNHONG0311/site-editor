@@ -136,120 +136,11 @@ export interface IconProps {
 }
 
 export const Icons = {
+    // Neutral product mark (Onlook's brand marks are not covered by the Apache-2.0 license).
     OnlookLogo: ({ className, ...props }: IconProps) => (
-        <svg
-            xmlns="http://www.w3.org/2000/svg"
-            viewBox="0 0 22 22"
-            fill="none"
-            className={className}
-            {...props}
-        >
-            <g clipPath="url(#clip0_2707_69355)">
-                <mask
-                    id="mask0_2707_69355"
-                    style={{ maskType: 'alpha' }}
-                    maskUnits="userSpaceOnUse"
-                    x="0"
-                    y="0"
-                    width="23"
-                    height="22"
-                >
-                    <circle
-                        cx="11.0078"
-                        cy="11"
-                        r="11"
-                        fill="black"
-                        style={{ fill: 'black', fillOpacity: 1 }}
-                    />
-                </mask>
-                <g mask="url(#mask0_2707_69355)">
-                    <path
-                        fillRule="evenodd"
-                        clipRule="evenodd"
-                        d="M16.737 20.3969C19.9024 18.4654 22.0156 14.9795 22.0156 11C22.0156 4.92487 17.0908 0 11.0156 0C4.94049 0 0.015625 4.92487 0.015625 11C0.015625 13.6014 0.918657 15.9919 2.42835 17.8751L6.43945 14.6732V10.2135V8.20775L3.9857 5.75391H6.43945H15.6693C16.5441 5.75391 17.2533 6.46309 17.2533 7.33791V10.1708C16.4269 9.5987 15.8319 9.13852 15.8319 9.13852L13.0395 10.8308L17.8203 14.8924L16.737 20.3969ZM11.3203 6.98584H14.6616C14.6616 6.98584 14.7871 8.37687 12.9594 8.37687C11.3203 6.98574 11.3203 6.98584 11.3203 6.98584Z"
-                        fill="#F7F7F7"
-                        style={{ fill: '#F7F7F7', fillOpacity: 1 }}
-                    />
-                </g>
-                <path
-                    fillRule="evenodd"
-                    clipRule="evenodd"
-                    d="M2.42188 17.8751L6.43297 14.6732V10.2135V8.20775L3.97922 5.75391H6.43297H15.6628C16.5376 5.75391 17.2468 6.46309 17.2468 7.33791V10.1708C16.4204 9.5987 15.8254 9.13852 15.8254 9.13852L13.0331 10.8308L17.8138 14.8924L16.7305 20.3969C15.0635 21.414 13.1048 22 11.0091 22C7.53543 22 4.43779 20.3898 2.42188 17.8751ZM11.3138 6.98584H14.6552C14.6552 6.98584 14.7806 8.37687 12.9529 8.37687C11.3138 6.98574 11.3138 6.98584 11.3138 6.98584Z"
-                    fill="#202123"
-                    style={{ fill: '#202123', fillOpacity: 1 }}
-                />
-                <mask id="path-4-inside-1_2707_69355" fill="white">
-                    <path d="M22.0078 11C22.0078 17.0751 17.0829 22 11.0078 22C4.93268 22 0.0078125 17.0751 0.0078125 11C0.0078125 4.92487 4.93268 0 11.0078 0C17.0829 0 22.0078 4.92487 22.0078 11Z" />
-                </mask>
-                <path
-                    d="M21.1484 11C21.1484 16.6005 16.6083 21.1406 11.0078 21.1406V22.8594C17.5576 22.8594 22.8672 17.5498 22.8672 11H21.1484ZM11.0078 21.1406C5.4073 21.1406 0.867188 16.6005 0.867188 11H-0.851562C-0.851562 17.5498 4.45806 22.8594 11.0078 22.8594V21.1406ZM0.867188 11C0.867188 5.39949 5.4073 0.859375 11.0078 0.859375V-0.859375C4.45806 -0.859375 -0.851562 4.45025 -0.851562 11H0.867188ZM11.0078 0.859375C16.6083 0.859375 21.1484 5.39949 21.1484 11H22.8672C22.8672 4.45025 17.5576 -0.859375 11.0078 -0.859375V0.859375Z"
-                    fill="#F7F7F7"
-                    style={{ fill: '#F7F7F7', fillOpacity: 1 }}
-                    mask="url(#path-4-inside-1_2707_69355)"
-                />
-            </g>
-            <defs>
-                <clipPath id="clip0_2707_69355">
-                    <rect
-                        width="22"
-                        height="22"
-                        fill="white"
-                        style={{ fill: 'white', fillOpacity: 1 }}
-                    />
-                </clipPath>
-            </defs>
-        </svg>
-    ),
-    OnlookIcon: ({ className, ...props }: IconProps) => (
-        <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width={22}
-            height={22}
-            fill="none"
-            className={className}
-            {...props}
-        >
-            <g clipPath="url(#clip0_2707_69355)">
-                <mask
-                    id="mask0_2707_69355"
-                    style={{ maskType: 'alpha' }}
-                    maskUnits="userSpaceOnUse"
-                    x="0"
-                    y="0"
-                    width="23"
-                    height="22"
-                >
-                    <circle
-                        cx="11.0078"
-                        cy="11"
-                        r="11"
-                        fill="black"
-                        style={{ fill: 'black', fillOpacity: 1 }}
-                    />
-                </mask>
-                <g mask="url(#mask0_2707_69355)">
-                    <path
-                        fillRule="evenodd"
-                        clipRule="evenodd"
-                        d="M16.737 20.3969C19.9024 18.4654 22.0156 14.9795 22.0156 11C22.0156 4.92487 17.0908 0 11.0156 0C4.94049 0 0.015625 4.92487 0.015625 11C0.015625 13.6014 0.918657 15.9919 2.42835 17.8751L6.43945 14.6732V10.2135V8.20775L3.9857 5.75391H6.43945H15.6693C16.5441 5.75391 17.2533 6.46309 17.2533 7.33791V10.1708C16.4269 9.5987 15.8319 9.13852 15.8319 9.13852L13.0395 10.8308L17.8203 14.8924L16.737 20.3969ZM11.3203 6.98584H14.6616C14.6616 6.98584 14.7871 8.37687 12.9594 8.37687C11.3203 6.98574 11.3203 6.98584 11.3203 6.98584Z"
-                        className={className}
-                        style={{ fillOpacity: 1 }}
-                    />
-                </g>
-                <mask id="path-4-inside-1_2707_69355" fill="white">
-                    <path d="M22.0078 11C22.0078 17.0751 17.0829 22 11.0078 22C4.93268 22 0.0078125 17.0751 0.0078125 11C0.0078125 4.92487 4.93268 0 11.0078 0C17.0829 0 22.0078 4.92487 22.0078 11Z" />
-                </mask>
-            </g>
-            <defs>
-                <clipPath id="clip0_2707_69355">
-                    <rect
-                        width="22"
-                        height="22"
-                        fill="white"
-                        style={{ fill: 'white', fillOpacity: 1 }}
-                    />
-                </clipPath>
-            </defs>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 22 22" fill="none" className={className} {...props}>
+            <rect x="1" y="1" width="20" height="20" rx="5" stroke="currentColor" strokeWidth="2" />
+            <path d="M6 15.5l2.2-.5 7.3-7.3a1.4 1.4 0 0 0-2-2L6.2 13 6 15.5z" fill="currentColor" />
         </svg>
     ),
     OnlookTextLogo: ({ className, ...props }: IconProps) => (
@@ -259,58 +150,12 @@ export const Icons = {
             height="17"
             viewBox="0 0 139 17"
             fill="none"
-            className={cn('w-auto h-auto preserve-aspect-ratio dark:invert', className)}
+            className={cn('w-auto h-auto preserve-aspect-ratio', className)}
             {...props}
         >
-            <path
-                d="M26.7578 16.502V4.40195H28.7485L43.3051 15.4019H44.7981V3.30195"
-                stroke="black"
-                style={{ stroke: 'black', strokeOpacity: 1 }}
-                strokeWidth="2.73715"
-            />
-            <path
-                d="M50.7734 3.30237V15.4023L67.0719 15.4023"
-                stroke="black"
-                style={{ stroke: 'black', strokeOpacity: 1 }}
-                strokeWidth="2.73715"
-            />
-            <rect
-                x="2"
-                y="4.62305"
-                width="19.4089"
-                height="10.56"
-                rx="5.27999"
-                stroke="black"
-                style={{ stroke: 'black', strokeOpacity: 1 }}
-                strokeWidth="2.73715"
-            />
-            <rect
-                x="69.6797"
-                y="4.62305"
-                width="19.4089"
-                height="10.56"
-                rx="5.27999"
-                stroke="black"
-                style={{ stroke: 'black', strokeOpacity: 1 }}
-                strokeWidth="2.73715"
-            />
-            <rect
-                x="94.0703"
-                y="4.62305"
-                width="19.4089"
-                height="10.56"
-                rx="5.27999"
-                stroke="black"
-                style={{ stroke: 'black', strokeOpacity: 1 }}
-                strokeWidth="2.73715"
-            />
-            <path
-                fillRule="evenodd"
-                clipRule="evenodd"
-                d="M120.823 10.3906V16.502H118.086V9.022V3.30204H120.823V7.65343H128.075L133.781 3.30213H138.295L130.657 9.126L138.583 16.502H134.565L127.999 10.3906H120.823ZM137.735 0.442137L137.66 0.34375L137.531 0.442137H137.735Z"
-                fill="black"
-                style={{ fill: 'black', fillOpacity: 1 }}
-            />
+            <text x="0" y="14" fill="currentColor" fontSize="16" fontWeight="600" fontFamily="inherit">
+                Site Editor
+            </text>
         </svg>
     ),
     GoogleLogo: ({ className, ...props }: IconProps) => (
