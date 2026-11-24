@@ -76,7 +76,7 @@ export class SiteRunner {
     }
 
     spawn(cmd, args) {
-        const child = spawn(cmd, args, { cwd: this.root, shell: isWin, env: { ...process.env, PORT: String(DEV_PORT), BROWSER: 'none', NEXT_TELEMETRY_DISABLED: '1' } });
+        const child = spawn(cmd, args, { cwd: this.root, shell: isWin, detached: !isWin, env: { ...process.env, PORT: String(DEV_PORT), BROWSER: 'none', NEXT_TELEMETRY_DISABLED: '1' } });
         child.stdout.on('data', (d) => this.addLog(d));
         child.stderr.on('data', (d) => this.addLog(d));
         return child;
@@ -108,7 +108,7 @@ export class SiteRunner {
         if (!c) return;
         // npm spawns next as a grandchild; kill the whole tree.
         if (isWin) spawn('taskkill', ['/pid', String(c.pid), '/T', '/F']);
-        else c.kill('SIGTERM');
+        else process.kill(-c.pid, 'SIGTERM'); // the whole process group
         await new Promise((r) => setTimeout(r, 500));
     }
 

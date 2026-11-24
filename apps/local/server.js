@@ -8,6 +8,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { applyReplace, findMatches } from './lib/source-edit.js';
 import { SiteRunner } from './lib/site-runner.js';
+import { editElement, locate } from './lib/target.js';
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const EDITOR_PORT = 4000;
@@ -131,6 +132,18 @@ const routes = {
         const fileName = `${base}-${Date.now().toString(36)}${ext}`;
         fs.writeFileSync(path.join(dir, fileName), Buffer.from(String(b.data || ''), 'base64'));
         return replaceOrAsk(root, matches, b.choice, `/uploads/${fileName}`, '换图片', { raw: true });
+    },
+    'POST /api/locate': async (b) => {
+        const root = requireSite();
+        const { file, el, repeated } = await locate(root, runner.kind, b.target ?? {});
+        return { ok: true, file, name: el.name, repeated };
+    },
+    'POST /api/element': async (b) => {
+        const root = requireSite();
+        const labels = { delete: '删除', duplicate: '复制', up: '上移', down: '下移', style: '改样式' };
+        const undo = await editElement(root, runner.kind, b.target ?? {}, b.op, b.styles);
+        history.push({ label: labels[b.op] ?? b.op, files: [undo] });
+        return { ok: true };
     },
     'POST /api/undo': async () => {
         const root = requireSite();

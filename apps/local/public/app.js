@@ -79,27 +79,93 @@ async function poll() {
     }
 }
 
+const TAGS = { h1: '大标题', h2: '标题', h3: '小标题', p: '段落', a: '链接/按钮', button: '按钮', img: '图片', section: '区块', div: '区块', header: '页头', footer: '页脚', nav: '菜单', li: '列表项', span: '文字', ul: '列表' };
+const toHex = (c) => {
+    const m = /rgba?\((\d+),\s*(\d+),\s*(\d+)(?:,\s*([\d.]+))?/.exec(c || '');
+    if (!m || m[4] === '0') return '';
+    return '#' + [m[1], m[2], m[3]].map((n) => Number(n).toString(16).padStart(2, '0')).join('');
+};
+const px = (v) => Math.round(parseFloat(v) || 0);
+
 function renderProps() {
     const el = $('props');
     if (!selection) {
         el.innerHTML = '<p class="hint">单击网页上的东西来选中它。<br>双击文字可以直接修改，按 Enter 保存，按 Esc 取消。<br>想点链接换页面时，切换到上面的「浏览」。</p>';
         return;
     }
+    const parts = [`<p class="kind">已选中：<b>${TAGS[selection.tag] ?? selection.tag}</b></p>`];
+    if (selection.kind === 'text') parts.push('<h3>文字</h3><textarea id="text-input"></textarea><div class="actions"><button class="primary" id="text-save">保存文字</button></div>');
+    if (selection.kind === 'image') parts.push('<h3>图片</h3><img class="img-preview" alt=""><p class="hint" id="img-src"></p><div class="actions"><button class="primary" id="img-pick">换一张图片</button></div><input type="file" id="img-file" accept="image/*" hidden>');
+    parts.push('<div id="structure"><p class="hint">正在查找它在代码里的位置…</p></div>');
+    el.innerHTML = parts.join('');
     if (selection.kind === 'text') {
-        el.innerHTML = '<h3>文字</h3><textarea id="text-input"></textarea><div class="actions"><button class="primary" id="text-save">保存</button></div>';
         $('text-input').value = selection.text;
         $('text-save').onclick = () => editText(selection.text, $('text-input').value.trim());
-        return;
     }
     if (selection.kind === 'image') {
-        el.innerHTML = '<h3>图片</h3><img class="img-preview" alt=""><p class="hint" id="img-src"></p><div class="actions"><button class="primary" id="img-pick">换一张图片</button></div><input type="file" id="img-file" accept="image/*" hidden>';
         el.querySelector('img').src = new URL(selection.src, state.previewUrl).href;
         $('img-src').textContent = selection.src;
         $('img-pick').onclick = () => $('img-file').click();
         $('img-file').onchange = (e) => e.target.files[0] && replaceImage(selection.src, e.target.files[0]);
+    }
+    renderStructure(selection);
+}
+
+async function renderStructure(sel) {
+    const r = await api('/api/locate', { target: sel.target });
+    if (sel !== selection) return; // selection changed meanwhile
+    const box = $('structure');
+    if (!r.ok) {
+        box.innerHTML = '<p class="hint"></p>';
+        box.firstChild.textContent = (r.message || '找不到它在代码里的位置') + ' 可以点外面一层或里面的文字试试。';
         return;
     }
-    el.innerHTML = '<p class="hint">这是一个区块，里面有好几样东西。请直接点里面的文字或图片。</p>';
+    const st = sel.styles || {};
+    box.innerHTML = `
+        ${r.repeated ? '<p class="warn">这是列表里重复的一项，改它会影响列表里的每一项。</p>' : ''}
+        <h3>位置</h3>
+        <div class="actions wrap">
+            <button data-op="up">↑ 上移</button><button data-op="down">↓ 下移</button>
+            <button data-op="duplicate">复制</button><button data-op="delete" class="danger">删除</button>
+        </div>
+        <h3>样式</h3>
+        <div class="form">
+            <label>文字颜色 <input type="color" data-style="color"></label>
+            <label>背景颜色 <span class="row"><input type="color" data-style="backgroundColor"><button type="button" data-clear="backgroundColor">无</button></span></label>
+            <label>字号（px） <input type="number" min="8" max="200" data-style="fontSize" data-unit="px"></label>
+            <label>粗细 <select data-style="fontWeight"><option value="400">正常</option><option value="600">半粗</option><option value="700">粗</option></select></label>
+            <label>对齐 <select data-style="textAlign"><option value="left">靠左</option><option value="center">居中</option><option value="right">靠右</option></select></label>
+            <label>上内边距（px） <input type="number" min="0" max="400" data-style="paddingTop" data-unit="px"></label>
+            <label>下内边距（px） <input type="number" min="0" max="400" data-style="paddingBottom" data-unit="px"></label>
+            <label>上外边距（px） <input type="number" min="-200" max="400" data-style="marginTop" data-unit="px"></label>
+            <label>下外边距（px） <input type="number" min="-200" max="400" data-style="marginBottom" data-unit="px"></label>
+            <label>圆角（px） <input type="number" min="0" max="200" data-style="borderRadius" data-unit="px"></label>
+        </div>`;
+    for (const input of box.querySelectorAll('[data-style]')) {
+        const k = input.dataset.style;
+        input.value = input.type === 'color' ? toHex(st[k]) || '#000000' : input.dataset.unit ? px(st[k]) : st[k] === 'start' ? 'left' : String(st[k] ?? '');
+        if (k === 'fontWeight') input.value = Number(st[k]) >= 650 ? '700' : Number(st[k]) >= 550 ? '600' : '400';
+        input.onchange = () => elementOp('style', { [k]: input.dataset.unit ? `${input.value}px` : input.value });
+    }
+    for (const b of box.querySelectorAll('[data-clear]')) b.onclick = () => elementOp('style', { [b.dataset.clear]: 'transparent' });
+    for (const b of box.querySelectorAll('[data-op]')) {
+        b.onclick = () => {
+            if (b.dataset.op === 'delete' && !confirm('确定删除这个部分？（可以按「撤销」恢复）')) return;
+            elementOp(b.dataset.op);
+        };
+    }
+}
+
+async function elementOp(op, styles) {
+    const r = await api('/api/element', { target: selection.target, op, styles });
+    if (!r.ok) return toast(r.message || '修改失败', true);
+    toast({ delete: '已删除', duplicate: '已复制', up: '已上移', down: '已下移', style: '样式已改' }[op]);
+    if (op !== 'style') {
+        selection = null;
+        renderProps();
+    }
+    if (state.kind === 'static') reloadPreview();
+    poll();
 }
 
 /** Ask which place to change when the same text sits in several. Resolves to an index, 'all', or null. */

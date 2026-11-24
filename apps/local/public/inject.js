@@ -40,6 +40,34 @@
         return { kind: 'block', text: el.innerText.trim().slice(0, 200) };
     };
 
+    /** What the editor needs to find this element in the source. */
+    const target = (el) => {
+        const fiberKey = Object.keys(el).find((k) => k.startsWith('__reactFiber$'));
+        const fibers = [];
+        for (let f = fiberKey && el[fiberKey]; f && fibers.length < 30; f = f.return) {
+            // Index 0 is always the clicked element itself, even without a stack.
+            if (fibers.length === 0 || f._debugStack) fibers.push({ stack: f._debugStack?.stack || '' });
+        }
+        const domPath = [];
+        for (let n = el; n && n !== document.body && n.parentElement; n = n.parentElement) {
+            domPath.unshift([...n.parentElement.children].filter((c) => !isOurs(c)).indexOf(n));
+        }
+        return {
+            fibers,
+            tag: el.tagName.toLowerCase(),
+            className: typeof el.className === 'string' ? el.className : '',
+            text: el.innerText?.trim().slice(0, 80) || '',
+            domPath,
+            page: location.pathname,
+        };
+    };
+
+    const STYLE_KEYS = ['color', 'backgroundColor', 'fontSize', 'fontWeight', 'textAlign', 'paddingTop', 'paddingBottom', 'marginTop', 'marginBottom', 'borderRadius'];
+    const styles = (el) => {
+        const cs = getComputedStyle(el);
+        return Object.fromEntries(STYLE_KEYS.map((k) => [k, cs[k]]));
+    };
+
     const send = (msg) => parentWin.postMessage({ source: 'site-editor', ...msg }, '*');
 
     document.addEventListener('mouseover', (e) => {
@@ -63,7 +91,7 @@
         if (editing) finishEdit(true);
         selected = e.target;
         place(selectBox, selected);
-        send({ type: 'select', tag: selected.tagName.toLowerCase(), ...describe(selected) });
+        send({ type: 'select', tag: selected.tagName.toLowerCase(), ...describe(selected), target: target(selected), styles: styles(selected) });
     }, true);
 
     document.addEventListener('dblclick', (e) => {
