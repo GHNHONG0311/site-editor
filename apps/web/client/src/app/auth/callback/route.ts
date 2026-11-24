@@ -38,6 +38,14 @@ export async function GET(request: Request) {
             return NextResponse.redirect(`${origin}${Routes.AUTH_REDIRECT}`);
         }
         console.error(`Error exchanging code for session: ${error}`);
+        // A repeated hit on the same link (double load, mail-app prefetch) fails here even though
+        // the first one already signed the user in; send them on instead of to the error page.
+        const {
+            data: { user },
+        } = await supabase.auth.getUser();
+        if (user) {
+            return NextResponse.redirect(`${origin}${Routes.AUTH_REDIRECT}`);
+        }
     }
 
     // return the user to an error page with instructions
