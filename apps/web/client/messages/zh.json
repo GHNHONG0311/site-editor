@@ -7,7 +7,7 @@
             },
             "success": "项目创建成功。",
             "steps": {
-                "count": "第 {{current}} 步，共 {{total}} 步",
+                "count": "第 {current} 步，共 {total} 步",
                 "error": "缺少项目数据。"
             },
             "methods": {
@@ -30,7 +30,7 @@
                 "recent": "最近更新",
                 "name": "项目名称"
             },
-            "lastEdited": "上次编辑于 {{time}} 之前"
+            "lastEdited": "上次编辑于 {time} 之前"
         },
         "actions": {
             "import": "导入",
@@ -119,8 +119,8 @@
                 "features": [
                     "可视化代码编辑器访问",
                     "无限制项目",
-                    "每天 {{dailyMessages}} 条 AI 聊天消息",
-                    "每月 {{monthlyMessages}} 条 AI 消息",
+                    "每天 {dailyMessages} 条 AI 聊天消息",
+                    "每月 {monthlyMessages} 条 AI 消息",
                     "每次聊天限 1 张截图"
                 ]
             },
