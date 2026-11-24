@@ -17,6 +17,7 @@
             <div class="seg" role="group" aria-label="预览大小">
                 <button id="size-desktop" class="on">电脑</button><button id="size-phone">手机</button>
             </div>
+            <button id="data" disabled title="改产品、分店、菜单等列表资料">资料表格</button>
             <button id="publish" disabled title="第 3 步加入">发布</button>
         </div>
     </header>
@@ -55,6 +56,14 @@
             <div id="choices"></div>
             <div class="row end"><button value="cancel">取消</button></div>
         </form>
+    </dialog>
+    <dialog id="data-dialog" class="wide">
+        <div class="row" style="justify-content: space-between; align-items: center">
+            <h2 style="margin: 0">资料表格</h2>
+            <button id="data-close">关闭</button>
+        </div>
+        <p class="hint">网站里的列表资料（产品、分店、菜单链接等）。改完一格按 Enter 或点别处就会保存，可以按「撤销」恢复。</p>
+        <div id="tables"></div>
     </dialog>
     <div id="toast" role="status" aria-live="polite"></div>
     <script src="/app.js" type="module"></script>

@@ -14,7 +14,7 @@ if (-not (Get-Command git -ErrorAction SilentlyContinue)) {
 }
 
 $files = @('server.js', 'package.json', 'start.bat', 'lib/source-edit.js', 'lib/site-runner.js',
-           'lib/locate.js', 'lib/markup.js', 'lib/target.js',
+           'lib/locate.js', 'lib/markup.js', 'lib/target.js', 'lib/data-lists.js',
            'public/index.html', 'public/app.js', 'public/style.css', 'public/inject.js')
 foreach ($f in $files) {
     $target = Join-Path $dir $f

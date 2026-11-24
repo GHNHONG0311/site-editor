@@ -9,6 +9,7 @@ import { fileURLToPath } from 'node:url';
 import { applyReplace, findMatches } from './lib/source-edit.js';
 import { SiteRunner } from './lib/site-runner.js';
 import { editElement, locate } from './lib/target.js';
+import { editTable, listTables } from './lib/data-lists.js';
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const EDITOR_PORT = 4000;
@@ -143,6 +144,12 @@ const routes = {
         const labels = { delete: '删除', duplicate: '复制', up: '上移', down: '下移', style: '改样式' };
         const undo = await editElement(root, runner.kind, b.target ?? {}, b.op, b.styles);
         history.push({ label: labels[b.op] ?? b.op, files: [undo] });
+        return { ok: true };
+    },
+    'GET /api/tables': () => ({ ok: true, tables: listTables(requireSite()) }),
+    'POST /api/table': async (b) => {
+        const undo = editTable(requireSite(), b);
+        history.push({ label: { set: '改资料', duplicate: '复制一行', delete: '删除一行' }[b.op] ?? '改资料', files: [undo] });
         return { ok: true };
     },
     'POST /api/undo': async () => {

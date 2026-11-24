@@ -68,6 +68,7 @@ async function poll() {
     $('undo').title = state.undoLabel ? `撤销：${state.undoLabel}` : '撤销上一次修改';
     $('restart').hidden = !state.site;
     const ready = state.status === 'ready';
+    $('data').disabled = !ready;
     if (ready && (prev.status !== 'ready' || prev.site !== state.site)) {
         preview.src = state.previewUrl;
         preview.hidden = false;
@@ -117,7 +118,11 @@ async function renderStructure(sel) {
     const box = $('structure');
     if (!r.ok) {
         box.innerHTML = '<p class="hint"></p>';
-        box.firstChild.textContent = (r.message || '找不到它在代码里的位置') + ' 可以点外面一层或里面的文字试试。';
+        box.firstChild.textContent = (r.message || '找不到它在代码里的位置') + ' 可以点外面一层或里面的文字试试。如果它是列表里的一项（产品、链接等），请用「资料表格」改。';
+        const b = document.createElement('button');
+        b.textContent = '打开资料表格';
+        b.onclick = openTables;
+        box.append(b);
         return;
     }
     const st = sel.styles || {};
@@ -253,8 +258,83 @@ $('undo').onclick = async () => {
     const r = await api('/api/undo', {});
     if (r.ok) toast(`已撤销：${r.label}`);
     if (state.kind === 'static') reloadPreview();
+    if ($('data-dialog').open) renderTables();
     poll();
 };
+
+// ---- Data tables: lists of records written in the site's code (products, branches, menu links...)
+const openTables = async () => {
+    $('data-dialog').showModal();
+    await renderTables();
+};
+async function renderTables() {
+    const box = $('tables');
+    const open = new Set([...box.querySelectorAll('details[open]')].map((d) => d.dataset.key));
+    const r = await api('/api/tables');
+    if (!r.ok) return (box.textContent = r.message || '读取失败');
+    if (!r.tables.length) return (box.innerHTML = '<p class="hint">这个网站里没有找到列表资料。</p>');
+    box.replaceChildren();
+    for (const t of r.tables) {
+        const key = `${t.file}|${t.label}`;
+        const d = document.createElement('details');
+        d.dataset.key = key;
+        d.open = open.has(key) || (open.size === 0 && box.children.length === 0);
+        const sum = document.createElement('summary');
+        sum.textContent = t.label;
+        const small = document.createElement('small');
+        small.textContent = `${t.rows.length} 行 · ${t.file}`;
+        sum.append(small);
+        const wrap = document.createElement('div');
+        wrap.className = 'tbl-wrap';
+        const table = document.createElement('table');
+        table.className = 'tbl';
+        const head = table.insertRow();
+        for (const c of [...t.columns, '']) head.append(Object.assign(document.createElement('th'), { textContent: t.tuple ? `第 ${c} 栏` : c }));
+        if (t.tuple) head.lastChild.textContent = '';
+        for (const row of t.rows) {
+            const tr = table.insertRow();
+            for (const c of t.columns) {
+                const td = tr.insertCell();
+                const has = c in row.cells;
+                const input = document.createElement('input');
+                if (t.types[c] === 'boolean') {
+                    input.type = 'checkbox';
+                    input.checked = row.cells[c] === 'true';
+                    input.onchange = () => tableOp(t, row, 'set', c, String(input.checked));
+                } else {
+                    input.type = 'text';
+                    input.value = row.cells[c] ?? '';
+                    input.placeholder = has ? '' : '（没填）';
+                    if (t.types[c] === 'number') input.inputMode = 'decimal';
+                    input.onchange = () => tableOp(t, row, 'set', c, input.value);
+                    input.onkeydown = (e) => e.key === 'Enter' && input.blur();
+                }
+                if (t.tuple && !has) input.disabled = true;
+                td.append(input);
+            }
+            const ops = tr.insertCell();
+            ops.className = 'ops';
+            const dup = Object.assign(document.createElement('button'), { textContent: '复制' });
+            dup.onclick = () => tableOp(t, row, 'duplicate');
+            const del = Object.assign(document.createElement('button'), { textContent: '删除', className: 'danger' });
+            del.onclick = () => confirm('确定删除这一行？（可以按「撤销」恢复）') && tableOp(t, row, 'delete');
+            ops.append(dup, del);
+        }
+        wrap.append(table);
+        d.append(sum, wrap);
+        box.append(d);
+    }
+}
+async function tableOp(t, row, op, key, value) {
+    const r = await api('/api/table', { file: t.file, table: t.start, row: row.start, op, key, value });
+    if (!r.ok) toast(r.message || '保存失败', true);
+    else toast({ set: '已保存', duplicate: '已复制一行', delete: '已删除一行' }[op]);
+    if (state.kind === 'static') reloadPreview();
+    await renderTables();
+    poll();
+}
+$('data').onclick = openTables;
+$('data-close').onclick = () => $('data-dialog').close();
 const setMode = (m) => {
     mode = m;
     $('mode-edit').classList.toggle('on', m === 'edit');
