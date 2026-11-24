@@ -74,7 +74,8 @@ elif [ -f pnpm-lock.yaml ]; then corepack enable >/dev/null 2>&1; PM=pnpm
 elif [ -f yarn.lock ]; then corepack enable >/dev/null 2>&1; PM=yarn
 else PM=npm; fi
 [ -d node_modules ] || $PM install
-pkill -f "next dev" >/dev/null 2>&1
+# Bracket pattern so pkill does not match (and kill) this very bash, whose command line contains it.
+pkill -f "[n]ext dev" >/dev/null 2>&1
 nohup $PM run dev -- -H 0.0.0.0 -p ${VSB_PORT} > ${DEV_LOG} 2>&1 &`;
 
 /** A sandbox created without a source has no project folder yet; create it, owned by the default user. */
