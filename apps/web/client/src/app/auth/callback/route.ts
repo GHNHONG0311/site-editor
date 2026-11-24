@@ -12,9 +12,13 @@ export async function GET(request: Request) {
         const supabase = await createClient();
         const { error, data } = await supabase.auth.exchangeCodeForSession(code);
         if (!error) {
-            const user = await api.user.upsert({
-                id: data.user.id,
-            });
+            // A database failure must land on the error page, not a bare 500.
+            const user = await api.user
+                .upsert({ id: data.user.id })
+                .catch((e: unknown) => {
+                    console.error('User upsert failed', e);
+                    return null;
+                });
 
             if (!user) {
                 console.error(`Failed to create user for id: ${data.user.id}`, { user });
