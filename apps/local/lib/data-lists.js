@@ -72,6 +72,12 @@ function parseValue(src, i) {
     return { type: 'other', start: i, end };
 }
 
+/** Skips a TypeScript `as T` / `satisfies T` after a value. */
+function skipTs(src, i) {
+    i = skipWs(src, i);
+    return /^(as|satisfies)\s/.test(src.slice(i, i + 10)) ? skipWs(src, skipOther(src, i)) : i;
+}
+
 function parseObject(src, start) {
     const props = new Map();
     let i = skipWs(src, start + 1);
@@ -95,7 +101,7 @@ function parseObject(src, start) {
             if (src[i] === ':') {
                 const v = parseValue(src, i + 1);
                 props.set(key, v);
-                i = v.end;
+                i = skipTs(src, v.end);
             } else if (src[i] !== ',' && src[i] !== '}') throw new Error('unsupported property');
         }
         i = skipWs(src, i);
@@ -111,7 +117,7 @@ function parseArray(src, start) {
     while (src[i] !== ']') {
         const v = parseValue(src, i);
         items.push(v);
-        i = skipWs(src, v.end);
+        i = skipTs(src, v.end);
         if (src[i] === ',') i = skipWs(src, i + 1);
         else if (src[i] !== ']') throw new Error('expected , or ]');
     }
@@ -179,9 +185,15 @@ function collect(node, label, out) {
 /** Tables in one file's source. */
 export function tablesIn(src, json = false) {
     const found = [];
-    for (const { name, node } of roots(src, json)) collect(node, name, found);
+    for (const { name, node } of roots(src, json)) {
+        // A top-level object with plain values (shop name, phone, page title...) is a one-row "settings" table.
+        if (node.type === 'object' && [...node.props.values()].some((v) => v.type === 'string')) {
+            found.push({ label: name, node: { type: 'array', start: node.start, items: [node] }, rows: [node], single: true });
+        }
+        collect(node, name, found);
+    }
     const tables = [];
-    for (const { label, node, rows: rowNodes } of found) {
+    for (const { label, node, rows: rowNodes, single } of found) {
         const columns = [];
         const types = {};
         for (const row of rowNodes) {
@@ -200,7 +212,7 @@ export function tablesIn(src, json = false) {
                 return [k, v.type === 'literal' ? (v.value === 'null' || v.value === 'undefined' ? '' : v.value) : String(v.value)];
             })),
         }));
-        tables.push({ label: label.replace(/^ › /, ''), start: node.start, columns, types, rows, tuple: !!rowNodes[0].tuple });
+        tables.push({ label: label.replace(/^ › /, ''), start: node.start, columns, types, rows, tuple: !!rowNodes[0].tuple, single: !!single });
     }
     return tables;
 }
@@ -254,7 +266,8 @@ function findRow(src, json, tableStart, rowStart) {
         else if (n.type === 'array') n.items.forEach(visit);
         else if (n.type === 'object') [...n.props.values()].forEach(visit);
     };
-    if (t) roots(src, json).forEach((r) => visit(r.node));
+    if (t?.single) arr = roots(src, json).map((r) => r.node).filter((n) => n.start === tableStart).map((n) => ({ items: [n] }))[0];
+    else if (t) roots(src, json).forEach((r) => visit(r.node));
     const index = arr ? arr.items.findIndex((r) => r.start === rowStart) : -1;
     if (index < 0) throw new Error('文件已经变了，请重新打开资料表格');
     return { table: t, arr, index, row: asRow(arr.items[index]) };
@@ -290,6 +303,8 @@ export function editTable(root, { file, table, row, op, key, value }) {
             const sep = before[j] === ',' || before[j] === '{' ? ' ' : ', ';
             after = before.slice(0, j + 1) + `${sep}${name}: ${lit}` + (before[j] === '{' ? ' ' : '') + before.slice(j + 1);
         }
+    } else if (t.single) {
+        throw new Error('这一项不能复制或删除');
     } else if (op === 'duplicate') {
         const text = before.slice(obj.start, obj.end);
         const lineStart = before.lastIndexOf('\n', obj.start) + 1;

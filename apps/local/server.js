@@ -9,6 +9,7 @@ import { fileURLToPath } from 'node:url';
 import { applyReplace, findMatches } from './lib/source-edit.js';
 import { SiteRunner } from './lib/site-runner.js';
 import { editElement, locate } from './lib/target.js';
+import { listVars, setVar } from './lib/css-vars.js';
 import { editTable, listTables } from './lib/data-lists.js';
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
@@ -146,10 +147,22 @@ const routes = {
         history.push({ label: labels[b.op] ?? b.op, files: [undo] });
         return { ok: true };
     },
-    'GET /api/tables': () => ({ ok: true, tables: listTables(requireSite()) }),
+    'GET /api/tables': () => ({ ok: true, tables: listTables(requireSite()).filter((t) => !t.single) }),
     'POST /api/table': async (b) => {
         const undo = editTable(requireSite(), b);
         history.push({ label: { set: '改资料', duplicate: '复制一行', delete: '删除一行' }[b.op] ?? '改资料', files: [undo] });
+        return { ok: true };
+    },
+    'GET /api/settings': () => {
+        const root = requireSite();
+        // Page titles and constants like SHOP / SITE_CONFIG with mostly filled-in values; skip scripts, tests and empty form defaults.
+        const info = listTables(root).filter((t) => t.single && !/(^|[\\/])(scripts|tests?|__tests__)[\\/]|\.test\./.test(t.file)
+            && (t.label === 'metadata' || (/^[A-Z][A-Z0-9_]*$/.test(t.label) && Object.values(t.rows[0].cells).filter(Boolean).length * 2 > t.columns.length)));
+        info.sort((a, b) => (a.label === 'metadata') - (b.label === 'metadata'));
+        return { ok: true, vars: listVars(root), info };
+    },
+    'POST /api/css-var': async (b) => {
+        history.push({ label: '改全站设置', files: [setVar(requireSite(), b)] });
         return { ok: true };
     },
     'POST /api/undo': async () => {

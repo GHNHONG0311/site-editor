@@ -7,7 +7,7 @@ const EXTS = new Set(['.tsx', '.ts', '.jsx', '.js', '.mjs', '.mdx', '.md', '.jso
 const SKIP = new Set(['node_modules', '.next', '.git', 'dist', 'build', 'out', '.vercel', '.turbo']);
 const ROOT_SKIP = new Set(['package.json', 'package-lock.json', 'tsconfig.json', 'next.config.js', 'next.config.mjs', 'next.config.ts']);
 
-export function listSourceFiles(root) {
+export function listSourceFiles(root, exts = EXTS) {
     const out = [];
     const walk = (dir, depth) => {
         for (const e of fs.readdirSync(dir, { withFileTypes: true })) {
@@ -15,7 +15,7 @@ export function listSourceFiles(root) {
             const p = path.join(dir, e.name);
             if (e.isDirectory()) {
                 if (depth < 8) walk(p, depth + 1);
-            } else if (EXTS.has(path.extname(e.name)) && !(depth === 0 && (ROOT_SKIP.has(e.name) || e.name.endsWith('.md')))) {
+            } else if (exts.has(path.extname(e.name)) && !(depth === 0 && (ROOT_SKIP.has(e.name) || e.name.endsWith('.md')))) {
                 out.push(p);
             }
         }

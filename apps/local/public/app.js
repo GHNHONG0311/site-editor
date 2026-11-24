@@ -68,7 +68,7 @@ async function poll() {
     $('undo').title = state.undoLabel ? `撤销：${state.undoLabel}` : '撤销上一次修改';
     $('restart').hidden = !state.site;
     const ready = state.status === 'ready';
-    $('data').disabled = !ready;
+    $('data').disabled = $('settings').disabled = !ready;
     if (ready && (prev.status !== 'ready' || prev.site !== state.site)) {
         preview.src = state.previewUrl;
         preview.hidden = false;
@@ -259,6 +259,7 @@ $('undo').onclick = async () => {
     if (r.ok) toast(`已撤销：${r.label}`);
     if (state.kind === 'static') reloadPreview();
     if ($('data-dialog').open) renderTables();
+    if ($('settings-dialog').open) renderSettings();
     poll();
 };
 
@@ -325,12 +326,113 @@ async function renderTables() {
         box.append(d);
     }
 }
+// ---- Site-wide settings: CSS theme variables plus single "info" objects (shop name, phone, page titles)
+const WORDS = { color: '', bg: '背景', background: '背景', surface: '卡片底', primary: '主色', secondary: '副色', accent: '点缀色', text: '文字', muted: '次要', border: '边框', hover: '鼠标移上', soft: '浅', font: '', brand: '标题', sans: '正文', serif: '衬线', heading: '标题', body: '正文', radius: '圆角', whatsapp: 'WhatsApp', blush: '粉底', shadow: '阴影', space: '间距', container: '版面', max: '最大宽度', sm: '小', md: '中', lg: '大', pill: '胶囊' };
+const varLabel = (name) => {
+    const parts = name.replace(/^--/, '').split('-').map((w) => WORDS[w] ?? w).filter(Boolean);
+    return (parts.join(' ') || name) + ({ font: '字体' }[name.split('-')[2]] ?? '');
+};
+const FONTS = [
+    ['Georgia, "Songti SC", "Noto Serif SC", serif', '典雅衬线'],
+    ['system-ui, "PingFang SC", "Microsoft YaHei", sans-serif', '简洁无衬线'],
+    ['"Trebuchet MS", "PingFang SC", "Microsoft YaHei", sans-serif', '活泼无衬线'],
+    ['ui-rounded, "Arial Rounded MT Bold", "PingFang SC", sans-serif', '圆体'],
+    ['"Times New Roman", "Songti SC", serif', '报纸衬线'],
+];
+const openSettings = async () => {
+    $('settings-dialog').showModal();
+    await renderSettings();
+};
+async function renderSettings() {
+    const box = $('settings-body');
+    const r = await api('/api/settings');
+    if (!r.ok) return (box.textContent = r.message || '读取失败');
+    box.replaceChildren();
+    const section = (title, parent = box) => {
+        parent.append(Object.assign(document.createElement('h3'), { textContent: title }));
+        const g = Object.assign(document.createElement('div'), { className: 'set-grid' });
+        parent.append(g);
+        return g;
+    };
+    const field = (grid, label, sub, input) => {
+        const l = document.createElement('label');
+        l.append(label, input);
+        if (sub) l.append(Object.assign(document.createElement('small'), { textContent: sub }));
+        grid.append(l);
+    };
+    const setVar = (v, value) => value !== v.value && cssVarOp(v, value);
+    const colors = r.vars.filter((v) => v.kind === 'color');
+    if (colors.length) {
+        const g = section('颜色');
+        for (const v of colors) {
+            const hex6 = /^#[0-9a-f]{6}$/i.test(v.value);
+            const input = Object.assign(document.createElement('input'), { type: hex6 ? 'color' : 'text', value: hex6 ? v.value.toLowerCase() : v.value });
+            input.onchange = () => setVar(v, input.value);
+            field(g, varLabel(v.name), v.name, input);
+        }
+    }
+    const fonts = r.vars.filter((v) => v.kind === 'font');
+    if (fonts.length) {
+        const g = section('字体');
+        for (const v of fonts) {
+            const sel = document.createElement('select');
+            sel.append(new Option('保持现在的字体', v.value, true, true));
+            for (const [value, label] of FONTS) sel.append(new Option(label, value));
+            sel.onchange = () => setVar(v, sel.value);
+            field(g, varLabel(v.name), v.name, sel);
+        }
+    }
+    for (const t of r.info) {
+        const g = section(t.label === 'metadata' ? `页面标题（${t.file}）` : `网站资料：${t.label}`);
+        const row = t.rows[0];
+        for (const c of t.columns) {
+            const input = document.createElement('input');
+            if (t.types[c] === 'boolean') {
+                input.type = 'checkbox';
+                input.checked = row.cells[c] === 'true';
+                input.onchange = () => tableOp(t, row, 'set', c, String(input.checked));
+            } else {
+                input.type = 'text';
+                input.value = row.cells[c] ?? '';
+                input.onchange = () => tableOp(t, row, 'set', c, input.value);
+                input.onkeydown = (e) => e.key === 'Enter' && input.blur();
+            }
+            field(g, { title: '网站标题', description: '网站简介（搜索结果显示）', name: '名字', nameZh: '中文名', whatsapp: 'WhatsApp 号码', phone: '电话', email: '电邮', address: '地址' }[c] ?? c, t.file, input);
+        }
+    }
+    const rest = r.vars.filter((v) => v.kind === 'size' || v.kind === 'other');
+    if (rest.length) {
+        const more = document.createElement('details');
+        more.append(Object.assign(document.createElement('summary'), { textContent: '更多：尺寸、圆角、间距' }));
+        box.append(more);
+        const g = section('', more);
+        for (const v of rest) {
+            const input = Object.assign(document.createElement('input'), { type: 'text', value: v.value });
+            input.onchange = () => setVar(v, input.value);
+            input.onkeydown = (e) => e.key === 'Enter' && input.blur();
+            field(g, varLabel(v.name), v.name, input);
+        }
+    }
+    if (!box.children.length) box.innerHTML = '<p class="hint">这个网站没有找到可以统一设置的颜色、字体或网站资料。</p>';
+}
+async function cssVarOp(v, value) {
+    const r = await api('/api/css-var', { file: v.file, name: v.name, old: v.value, value });
+    if (!r.ok) toast(r.message || '保存失败', true);
+    else toast('已保存');
+    if (state.kind === 'static') reloadPreview();
+    await renderSettings();
+    poll();
+}
+$('settings').onclick = openSettings;
+$('settings-close').onclick = () => $('settings-dialog').close();
+
 async function tableOp(t, row, op, key, value) {
     const r = await api('/api/table', { file: t.file, table: t.start, row: row.start, op, key, value });
     if (!r.ok) toast(r.message || '保存失败', true);
     else toast({ set: '已保存', duplicate: '已复制一行', delete: '已删除一行' }[op]);
     if (state.kind === 'static') reloadPreview();
-    await renderTables();
+    if ($('data-dialog').open) await renderTables();
+    if ($('settings-dialog').open) await renderSettings();
     poll();
 }
 $('data').onclick = openTables;
