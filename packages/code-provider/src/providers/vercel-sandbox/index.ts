@@ -332,7 +332,7 @@ export class VercelSandboxProvider extends Provider {
             task: new DevTask(
                 () => bash(this.sb, `tail -c 20000 ${DEV_LOG} 2>/dev/null`).then((r) => r.stdout),
                 () => startDevServer(this.sb),
-                () => bashOk(this.sb, 'pkill -f "next dev" || true').then(() => undefined),
+                () => bashOk(this.sb, 'pkill -f "[n]ext dev" || true').then(() => undefined),
             ),
         };
     }
