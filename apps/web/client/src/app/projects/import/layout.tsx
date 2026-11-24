@@ -4,8 +4,8 @@ import { type Metadata } from 'next';
 import { redirect } from 'next/navigation';
 
 export const metadata: Metadata = {
-    title: 'Onlook',
-    description: 'Onlook – Create Project',
+    title: '网站编辑器',
+    description: '网站编辑器 – Create Project',
 };
 
 export default async function Layout({ children }: Readonly<{ children: React.ReactNode }>) {

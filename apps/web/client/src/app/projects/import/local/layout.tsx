@@ -5,8 +5,8 @@ import { redirect } from 'next/navigation';
 import { ProjectCreationProvider } from './_context';
 
 export const metadata: Metadata = {
-    title: 'Onlook',
-    description: 'Onlook – Import Local Project',
+    title: '网站编辑器',
+    description: '网站编辑器 – Import Local Project',
 };
 
 export default async function Layout({ children }: Readonly<{ children: React.ReactNode }>) {

@@ -39,7 +39,7 @@ const Page = () => {
         >
             <div className="flex items-center justify-between px-12 py-4">
                 <Link href={Routes.HOME}>
-                    <Icons.OnlookTextLogo className="h-3" />
+                    <span className="text-sm font-medium whitespace-nowrap">网站编辑器</span>
                 </Link>
                 <CancelButton />
             </div>

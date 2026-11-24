@@ -307,16 +307,16 @@ export const NewSelectFolder = () => {
                 description: "This is where we'll reference your App",
             },
             validating: {
-                title: 'Verifying compatibility with Onlook',
-                description: "We're checking to make sure this project can work with Onlook",
+                title: 'Verifying compatibility with 网站编辑器',
+                description: "We're checking to make sure this project can work with 网站编辑器",
             },
             valid: {
                 title: 'Project verified',
-                description: 'Your project is ready to import to Onlook',
+                description: 'Your project is ready to import to 网站编辑器',
             },
             invalid: {
-                title: "This project won't work with Onlook",
-                description: 'Onlook only works with NextJS + React + Tailwind projects',
+                title: "This project won't work with 网站编辑器",
+                description: '网站编辑器 only works with NextJS + React + Tailwind projects',
             },
         };
 

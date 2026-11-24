@@ -40,7 +40,7 @@ export const ConnectGithub = () => {
             <StepHeader>
                 <div className="flex items-center gap-3">
                     <div className="p-3 bg-gray-700 rounded-lg">
-                        <Icons.OnlookLogo className="w-6 h-6" />
+                        <Icons.PencilPaper className="w-6 h-6" />
                     </div>
                     <Icons.DotsHorizontal className="w-6 h-6" />
                     <div className="p-3 bg-gray-700 rounded-lg">
@@ -49,7 +49,7 @@ export const ConnectGithub = () => {
                 </div>
                 <CardTitle className="text-xl font-normal">{'Connect to GitHub'}</CardTitle>
                 <CardDescription className="font-normal">
-                    {'Work with real code directly in Onlook'}
+                    {'Work with real code directly in 网站编辑器'}
                 </CardDescription>
             </StepHeader>
             <StepContent>
@@ -64,7 +64,7 @@ export const ConnectGithub = () => {
                     {itemContent({
                         title: installation.hasInstallation
                             ? 'GitHub App already connected'
-                            : 'Install Onlook GitHub App',
+                            : 'Install 网站编辑器 GitHub App',
                         description: installation.hasInstallation
                             ? 'You can access your repositories through the GitHub App'
                             : 'Get secure repository access with fine-grained permissions',

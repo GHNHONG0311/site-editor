@@ -74,9 +74,9 @@ export const VerifyProject = () => {
         if (!validation) {
             return (
                 <>
-                    <CardTitle>{'Verifying compatibility with Onlook'}</CardTitle>
+                    <CardTitle>{'Verifying compatibility with 网站编辑器'}</CardTitle>
                     <CardDescription>
-                        {"We're checking to make sure this project can work with Onlook"}
+                        {"We're checking to make sure this project can work with 网站编辑器"}
                     </CardDescription>
                 </>
             );
@@ -85,15 +85,15 @@ export const VerifyProject = () => {
             return (
                 <>
                     <CardTitle>{'Project verified'}</CardTitle>
-                    <CardDescription>{'Your project is ready to import to Onlook'}</CardDescription>
+                    <CardDescription>{'Your project is ready to import to 网站编辑器'}</CardDescription>
                 </>
             );
         } else {
             return (
                 <>
-                    <CardTitle>{"This project won't work with Onlook"}</CardTitle>
+                    <CardTitle>{"This project won't work with 网站编辑器"}</CardTitle>
                     <CardDescription>
-                        {'Onlook only works with NextJS + React + Tailwind projects'}
+                        {'网站编辑器 only works with NextJS + React + Tailwind projects'}
                     </CardDescription>
                 </>
             );

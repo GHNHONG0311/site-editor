@@ -14,7 +14,7 @@ import { AuthButton } from './user';
 const LINKS = [
     {
         href: Routes.HOME,
-        child: <Icons.OnlookTextLogo className="h-3" />,
+        child: <span className="text-sm font-medium whitespace-nowrap">网站编辑器</span>,
     },
 ];
 

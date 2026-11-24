@@ -23,7 +23,7 @@ export const HandleAuth = () => {
                 <Button variant="outline"
                     onClick={handleLogin}
                 >
-                    <Icons.OnlookLogo className="size-4" />
+                    <Icons.PencilPaper className="size-4" />
                     Login or Signup
                 </Button>
             </div>

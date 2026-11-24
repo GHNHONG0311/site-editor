@@ -105,7 +105,7 @@ export const ProjectBreadcrumb = observer(() => {
                         variant='ghost'
                         className="ml-1 px-0 gap-2 text-foreground-onlook text-small hover:text-foreground-active hover:!bg-transparent cursor-pointer group"
                     >
-                        <Icons.OnlookLogo
+                        <Icons.PencilPaper
                             className={cn(
                                 'w-9 h-9 hidden md:block',
                                 isClosingProject && 'animate-pulse',
