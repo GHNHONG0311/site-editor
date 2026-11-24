@@ -108,7 +108,7 @@
             "and": "和",
             "tos": "服务条款"
         },
-        "version": "版本 {{version}}"
+        "version": "版本 {version}"
     },
     "pricing": {
         "plans": {
