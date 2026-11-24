@@ -77,6 +77,19 @@ else PM=npm; fi
 pkill -f "next dev" >/dev/null 2>&1
 nohup $PM run dev -- -H 0.0.0.0 -p ${VSB_PORT} > ${DEV_LOG} 2>&1 &`;
 
+/** A sandbox created without a source has no project folder yet; create it, owned by the default user. */
+async function ensureRoot(sandbox: Sandbox) {
+    const who = await sandbox.runCommand({ cmd: 'bash', args: ['-c', 'echo $(id -u):$(id -g)'], cwd: '/' });
+    const owner = (await who.stdout()).trim();
+    const r = await sandbox.runCommand({
+        cmd: 'bash',
+        args: ['-c', `mkdir -p ${VSB_ROOT} && chown ${owner} ${VSB_ROOT}`],
+        cwd: '/',
+        sudo: true,
+    });
+    if (r.exitCode !== 0) throw new Error(`Could not create ${VSB_ROOT}: ${await r.stderr()}`);
+}
+
 async function bash(sandbox: Sandbox, script: string) {
     const r = await sandbox.runCommand({ cmd: 'bash', args: ['-c', script], cwd: VSB_ROOT });
     const [stdout, stderr] = await Promise.all([r.stdout(), r.stderr()]);
@@ -168,6 +181,7 @@ export class VercelSandboxProvider extends Provider {
             return { id: name };
         }
         const sandbox = await Sandbox.create({ name, ports: [VSB_PORT], timeout: SESSION_TIMEOUT_MS });
+        await ensureRoot(sandbox);
         if (BLANK_TEMPLATE_IDS.includes(input.id)) {
             return { id: name }; // empty VM; the caller uploads the project files
         }

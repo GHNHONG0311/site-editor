@@ -1,7 +1,6 @@
 import '@/styles/globals.css';
 import '@onlook/ui/globals.css';
 
-import RB2BLoader from '@/components/rb2b-loader';
 import { TelemetryProvider } from '@/components/telemetry-provider';
 import { env } from '@/env';
 import { FeatureFlagsProvider } from '@/hooks/use-feature-flags';
@@ -11,12 +10,10 @@ import { type Metadata } from 'next';
 import { NextIntlClientProvider } from 'next-intl';
 import { getLocale } from 'next-intl/server';
 import { Inter } from 'next/font/google';
-import Script from 'next/script';
 import { ThemeProvider } from './_components/theme';
 import { AuthProvider } from './auth/auth-context';
 import { faqSchema, organizationSchema } from './seo';
 
-const isProduction = env.NODE_ENV === 'production';
 
 export const metadata: Metadata = {
     title: 'Site Editor 网站编辑器',
@@ -72,12 +69,6 @@ export default async function RootLayout({ children }: { children: React.ReactNo
                 />
             </head>
             <body>
-                {isProduction && (
-                    <>
-                        <Script src="https://z.onlook.com/cdn-cgi/zaraz/i.js" strategy="lazyOnload" />
-                        <RB2BLoader />
-                    </>
-                )}
                 <TRPCReactProvider>
                     <FeatureFlagsProvider>
                         <TelemetryProvider>
